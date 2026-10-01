@@ -1,0 +1,104 @@
+local Players = game:GetService("Players")
+
+local me = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "TPMenu"
+gui.ResetOnSpawn = false
+gui.Parent = me:WaitForChild("PlayerGui")
+
+local open = Instance.new("TextButton")
+open.Size = UDim2.fromOffset(60, 60)
+open.Position = UDim2.new(0, 20, 0.5, -30)
+open.Text = "TP"
+open.TextSize = 20
+open.BackgroundColor3 = Color3.fromRGB(25, 30, 45)
+open.TextColor3 = Color3.new(1,1,1)
+open.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 15)
+corner.Parent = open
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(280, 350)
+frame.Position = UDim2.new(0.5, -140, 0.5, -175)
+frame.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+frame.Visible = false
+frame.Parent = gui
+
+local fc = Instance.new("UICorner")
+fc.CornerRadius = UDim.new(0, 15)
+fc.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Text = "TP TO ME"
+title.TextColor3 = Color3.fromRGB(80,170,255)
+title.TextSize = 22
+title.Font = Enum.Font.GothamBold
+title.Parent = frame
+
+local list = Instance.new("ScrollingFrame")
+list.Size = UDim2.new(1, -20, 1, -60)
+list.Position = UDim2.fromOffset(10, 55)
+list.BackgroundTransparency = 1
+list.ScrollBarThickness = 4
+list.Parent = frame
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 6)
+layout.Parent = list
+
+local function update()
+	for _,v in ipairs(list:GetChildren()) do
+		if v:IsA("TextButton") then
+			v:Destroy()
+		end
+	end
+
+	for _,player in ipairs(Players:GetPlayers()) do
+		if player ~= me then
+
+			local button = Instance.new("TextButton")
+			button.Size = UDim2.new(1, -5, 0, 45)
+			button.Text = player.DisplayName
+			button.TextSize = 16
+			button.TextColor3 = Color3.new(1,1,1)
+			button.BackgroundColor3 = Color3.fromRGB(25,35,55)
+			button.Parent = list
+
+			local c = Instance.new("UICorner")
+			c.CornerRadius = UDim.new(0,10)
+			c.Parent = button
+
+			button.MouseButton1Click:Connect(function()
+				local myChar = me.Character
+				local targetChar = player.Character
+
+				if myChar and targetChar then
+					local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+					local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+
+					if myRoot and targetRoot then
+						targetRoot.CFrame = myRoot.CFrame * CFrame.new(0,0,-4)
+					end
+				end
+			end)
+		end
+	end
+
+	list.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+end
+
+open.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+
+	if frame.Visible then
+		update()
+	end
+end)
+
+Players.PlayerAdded:Connect(update)
+Players.PlayerRemoving:Connect(update)
